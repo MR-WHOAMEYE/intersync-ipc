@@ -224,3 +224,14 @@ class DeadlockDetector:
             )
         except nx.NetworkXNoCycle:
             return DeadlockResult(detected=False, container_name=container_name)
+
+class VmDeadlockDetector(DeadlockDetector):
+    """
+    Subclass that fetches the rotating trace logs via the VM HTTP client 
+    instead of running `cat` via `lxc exec`.
+    """
+    def _pull_log(self, container_name: str) -> str:
+        # self._mgr is a VmContainerManager, which has .client
+        if hasattr(self._mgr, "client"):
+            return self._mgr.client.trace_logs(container_name, n=5000)
+        return super()._pull_log(container_name)

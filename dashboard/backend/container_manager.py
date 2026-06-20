@@ -67,12 +67,61 @@ class ContainerManager:
 
     @staticmethod
     def create_best() -> "ContainerManager":
-        """Factory: returns WslContainerManager on Windows, else ContainerManager."""
+        """Factory: returns VmContainerManager if IP set, WslContainerManager on Windows, else ContainerManager."""
         import sys
+        import os
+        vm_ip = os.environ.get("INTERSYNC_VM_IP")
+        if vm_ip:
+            log.info("INTERSYNC_VM_IP detected: using VmContainerManager for remote execution via FastAPI")
+            return VmContainerManager(vm_ip)
+        
         if sys.platform == "win32":
             log.info("Windows detected: using WSL CLI backend for LXD")
             return WslContainerManager()
         return ContainerManager()
+
+
+class VmContainerManager(ContainerManager):
+    """
+    Delegates all LXD container management and execution commands over HTTP 
+    to a FastAPI server running inside a VirtualBox VM (Parrot OS).
+    """
+    def __init__(self, vm_ip: str):
+        from dashboard.backend.vm_client import VMClient
+        self.client = VMClient(vm_ip)
+        
+    def list_containers(self) -> list[str]:
+        # Parse output from `lxc list --format=json` which the VM returns
+        try:
+            data = self.client.lxc_list()
+            return [c["name"] for c in data if c["name"].startswith("interync-lab")]
+        except Exception as exc:
+            raise ContainerError(f"VM lxc_list failed: {exc}")
+
+    def get_container(self, name: str):
+        pass # Not used in VM mode, mostly we just pass names
+
+    def ensure_running(self, name: str) -> None:
+        pass # In VM mode, we assume the VM already started its nested containers
+        
+    def exec(self, name: str, command: list[str], env: Optional[dict[str, str]] = None) -> "ExecResult":
+        try:
+            res = self.client.lxc_exec(name, command)
+            class _Res:
+                def __init__(self, c, o, e):
+                    self.exit_code = c
+                    self.stdout = o
+                    self.stderr = e
+            return _Res(res["exit_code"], res["stdout"], res["stderr"])
+        except Exception as exc:
+            raise ContainerError(f"VM exec failed for {command}: {exc}")
+
+    def push_file(self, container_name: str, local_path: str, remote_path: str, mode: int = 0o644) -> None:
+        try:
+            self.client.lxc_push(container_name, local_path, remote_path)
+        except Exception as exc:
+            raise ContainerError(f"VM push failed: {exc}")
+
 
     # ------------------------------------------------------------------ #
     # Container lifecycle                                                   #

@@ -60,20 +60,20 @@ sync_lock_t* sync_rwlock_open(void)
 static int rw_lock_fn(sync_lock_t* lock)
 {
     rwlock_lock_t* rl = (rwlock_lock_t*)lock;
-    sync_trace_log(lock, "WAIT");
+    sync_trace_log_rotating(lock, "WAIT");
     int ret = pthread_rwlock_wrlock(&rl->rwlock);
     if (ret) return -ret;
-    sync_trace_log(lock, "ACQUIRE");
+    sync_trace_log_rotating(lock, "ACQUIRE");
     return 0;
 }
 
 static int rw_lock_read(sync_lock_t* lock)
 {
     rwlock_lock_t* rl = (rwlock_lock_t*)lock;
-    sync_trace_log(lock, "WAIT");
+    sync_trace_log_rotating(lock, "WAIT");
     int ret = pthread_rwlock_rdlock(&rl->rwlock);
     if (ret) return -ret;
-    sync_trace_log(lock, "ACQUIRE");
+    sync_trace_log_rotating(lock, "ACQUIRE");
     return 0;
 }
 
@@ -82,7 +82,7 @@ static int rw_unlock_fn(sync_lock_t* lock)
     rwlock_lock_t* rl = (rwlock_lock_t*)lock;
     int ret = pthread_rwlock_unlock(&rl->rwlock);
     if (ret) return -ret;
-    sync_trace_log(lock, "RELEASE");
+    sync_trace_log_rotating(lock, "RELEASE");
     return 0;
 }
 

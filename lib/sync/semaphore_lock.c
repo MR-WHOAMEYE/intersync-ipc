@@ -55,11 +55,11 @@ sync_lock_t* sync_semaphore_open(void)
 static int sem_lock_fn(sync_lock_t* lock)
 {
     semaphore_lock_t* sl = (semaphore_lock_t*)lock;
-    sync_trace_log(lock, "WAIT");
+    sync_trace_log_rotating(lock, "WAIT");
     int ret;
     do { ret = sem_wait(&sl->sem); } while (ret < 0 && errno == EINTR);
     if (ret < 0) return -errno;
-    sync_trace_log(lock, "ACQUIRE");
+    sync_trace_log_rotating(lock, "ACQUIRE");
     return 0;
 }
 
@@ -69,7 +69,7 @@ static int sem_unlock_fn(sync_lock_t* lock)
 {
     semaphore_lock_t* sl = (semaphore_lock_t*)lock;
     if (sem_post(&sl->sem) < 0) return -errno;
-    sync_trace_log(lock, "RELEASE");
+    sync_trace_log_rotating(lock, "RELEASE");
     return 0;
 }
 

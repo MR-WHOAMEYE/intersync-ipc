@@ -47,21 +47,38 @@ def _load_backends():
     All may be None — the dashboard handles offline gracefully.
     """
     try:
-        from dashboard.backend.container_manager import ContainerManager, ContainerError
-        from dashboard.backend.metrics_collector import MetricsCollector
-        from dashboard.backend.deadlock_detector import DeadlockDetector
+        from dashboard.backend.container_manager import ContainerManager, VmContainerManager
+        mgr = ContainerManager.create_best()
+    except Exception as exc:
+        log.warning("Failed to initialize ContainerManager: %s", exc)
+        mgr = None
+
+    try:
         from dashboard.backend.interactive_backend import InteractiveBackend
+        ib = InteractiveBackend(mgr) if mgr else None
+    except Exception as exc:
+        log.warning("Failed to initialize InteractiveBackend: %s", exc)
+        ib = None
 
-        mgr      = ContainerManager.create_best()
-        metrics  = MetricsCollector(mgr)
-        detector = DeadlockDetector(mgr)
-        ib       = InteractiveBackend(mgr)
-        log.info("Backend connected to LXD")
-        return mgr, metrics, detector, ib
+    try:
+        from dashboard.backend.deadlock_detector import DeadlockDetector, VmDeadlockDetector
+        import os
+        if os.environ.get("INTERSYNC_VM_IP"):
+            detector = VmDeadlockDetector(mgr) if mgr else None
+        else:
+            detector = DeadlockDetector(mgr) if mgr else None
+    except Exception as exc:
+        log.warning("Failed to initialize DeadlockDetector: %s", exc)
+        detector = None
+    
+    try:
+        from dashboard.backend.metrics_collector import MetricsCollector
+        metrics = MetricsCollector(mgr) if mgr else None
+    except Exception as exc:
+        log.warning("Failed to initialize MetricsCollector: %s", exc)
+        metrics = None
 
-    except Exception as exc:  # noqa: BLE001
-        log.warning("Backend unavailable (%s) — running in preview mode.", exc)
-        return None, None, None, None
+    return mgr, metrics, detector, ib
 
 
 def _deploy_binaries_async(ib, mgr, container_names: list[str]) -> None:

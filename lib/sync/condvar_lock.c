@@ -67,10 +67,10 @@ sync_lock_t* sync_condvar_open(void)
 static int cv_lock_fn(sync_lock_t* lock)
 {
     condvar_lock_t* cl = (condvar_lock_t*)lock;
-    sync_trace_log(lock, "WAIT");
+    sync_trace_log_rotating(lock, "WAIT");
     int ret = pthread_mutex_lock(&cl->mutex);
     if (ret) return -ret;
-    sync_trace_log(lock, "ACQUIRE");
+    sync_trace_log_rotating(lock, "ACQUIRE");
     return 0;
 }
 
@@ -81,17 +81,17 @@ static int cv_unlock_fn(sync_lock_t* lock)
     condvar_lock_t* cl = (condvar_lock_t*)lock;
     int ret = pthread_mutex_unlock(&cl->mutex);
     if (ret) return -ret;
-    sync_trace_log(lock, "RELEASE");
+    sync_trace_log_rotating(lock, "RELEASE");
     return 0;
 }
 
 static int cv_wait_fn(sync_lock_t* lock)
 {
     condvar_lock_t* cl = (condvar_lock_t*)lock;
-    sync_trace_log(lock, "WAIT");
+    sync_trace_log_rotating(lock, "WAIT");
     int ret = pthread_cond_wait(&cl->cond, &cl->mutex);
     if (ret) return -ret;
-    sync_trace_log(lock, "ACQUIRE");
+    sync_trace_log_rotating(lock, "ACQUIRE");
     return 0;
 }
 

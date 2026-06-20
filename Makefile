@@ -418,6 +418,31 @@ containers-shell:
 	@lxc exec "$(CONTAINER_PREFIX)-1" -- /bin/bash
 
 # ============================================================================
+# VM API Integration
+# ============================================================================
+
+.PHONY: vm-api-install vm-api-start vm-api-stop vm-test vm-ready
+
+vm-api-install:
+	pip3 install -r vm_api/requirements.txt
+
+vm-api-start:
+	@echo "Starting FastAPI on VM (0.0.0.0:5000)..."
+	nohup vm_api/start.sh > /dev/null 2>&1 &
+
+vm-api-stop:
+	pkill -f uvicorn || true
+
+vm-test:
+	curl -s http://127.0.0.1:5000/api/lxc/list | jq .
+
+vm-ready: clean build-libs build-interactive build-spsc
+	@echo "Installing VM API dependencies..."
+	pip3 install -r vm_api/requirements.txt
+	@echo "API server ready. Run: make vm-api-start"
+	@echo "Dashboard: INTERSYNC_VM_IP=192.168.56.101 make app"
+
+# ============================================================================
 # CLEANUP
 # ============================================================================
 
