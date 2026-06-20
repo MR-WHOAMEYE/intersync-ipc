@@ -1,0 +1,24 @@
+{
+    "id": "triage",
+    "name": "Triage",
+    "description": "A deadlock has been injected. Resolve it quickly!",
+    "target_tab": "Sync & Locks",
+    "initial_state": {
+        "action": "inject_deadlock",
+        "container": "interync-lab-1",
+        "primitive": "MUTEX",
+        "threads": 3
+    },
+    "win_condition": {
+        "type": "deadlock_resolved",
+        "timeout_s": 15
+    },
+    "lose_condition": {
+        "type": "timeout"
+    },
+    "instructions": [
+        "1. A deadlock has been triggered.",
+        "2. Look at the wait-for graph to identify the cycle.",
+        "3. Hit the [RESOLVE] button before 15 seconds run out."
+    ]
+}

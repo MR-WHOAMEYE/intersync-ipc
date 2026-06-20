@@ -1,0 +1,25 @@
+{
+    "id": "speed_feast",
+    "name": "Speed Feast",
+    "description": "See how fast you can get 10 philosophers to eat 200 meals. Tune the think/eat times to minimize contention.",
+    "target_tab": "Dining Philosophers",
+    "initial_state": {
+        "count": 10,
+        "avoidance": true,
+        "think_ms": 100,
+        "eat_ms": 100
+    },
+    "win_condition": {
+        "type": "philo_meals",
+        "target": 200,
+        "timeout_s": 20
+    },
+    "lose_condition": {
+        "type": "timeout"
+    },
+    "instructions": [
+        "1. You have 20 seconds to reach 200 meals.",
+        "2. Adjust think/eat times to speed up the simulation.",
+        "3. Click PLAY!"
+    ]
+}

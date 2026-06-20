@@ -1,0 +1,26 @@
+{
+    "id": "avoid_deadlock",
+    "name": "Avoid the Deadlock",
+    "description": "5 philosophers are dining. Without Dijkstra's avoidance, they will eventually deadlock. Enable avoidance and ensure they eat 100 meals without freezing.",
+    "target_tab": "Dining Philosophers",
+    "initial_state": {
+        "count": 5,
+        "avoidance": false,
+        "think_ms": 10,
+        "eat_ms": 10
+    },
+    "win_condition": {
+        "type": "philo_meals",
+        "target": 100
+    },
+    "lose_condition": {
+        "type": "deadlock",
+        "timeout_s": 30
+    },
+    "instructions": [
+        "1. Click PLAY. Notice how quickly they deadlock without a global order.",
+        "2. Stop the simulation.",
+        "3. Check 'Deadlock Avoidance (Dijkstra)'.",
+        "4. Click PLAY again and let them reach 100 meals!"
+    ]
+}

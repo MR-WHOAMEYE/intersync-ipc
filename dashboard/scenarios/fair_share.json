@@ -1,0 +1,25 @@
+{
+    "id": "fair_share",
+    "name": "Fair Share",
+    "description": "Ensure fairness. Run the dining philosophers simulation until total meals reach 50, but make sure the maximum difference in meals between any two philosophers is less than 3.",
+    "target_tab": "Dining Philosophers",
+    "initial_state": {
+        "count": 5,
+        "avoidance": true,
+        "think_ms": 100,
+        "eat_ms": 100
+    },
+    "win_condition": {
+        "type": "philo_meals",
+        "target": 50
+    },
+    "lose_condition": {
+        "type": "fairness",
+        "max_diff": 5
+    },
+    "instructions": [
+        "1. Click PLAY.",
+        "2. The engine will monitor fairness.",
+        "3. Wait until 50 meals are reached."
+    ]
+}
